@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">遅延なう</string>
+    <string name="about"><a href="https://github.com/yukiishii/Chien-info-for-Android">ソースコードはこちら</a></string>
+</resources>
