@@ -1,20 +1,30 @@
 package com.appspot.chieninfo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.graphics.Picture;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebView.PictureListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	private static final String DEFAULT_URL = "http://chien-info.appspot.com/";
-
+	
+	private static final String PROGRESS_DIALOG_MSG = "Now Loading ...";
     WebView mWebView;
+
+    ProgressDialog dialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -23,10 +33,34 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
         setActionBar();
 
+        dialog = new ProgressDialog(this);
+        dialog.setMessage(PROGRESS_DIALOG_MSG);
+		dialog.show();
+        
+        Map<String, String> httpHeaders = new HashMap<String, String>();
+        httpHeaders.put("Accept-Encoding", "gzip");
+
+        WebChromeClient chrome = new WebChromeClient() {
+        	public void onProgressChanged(WebView view, int progress) {
+        		dialog.setProgress(progress);
+        	}
+        };
+        PictureListener picture = new PictureListener(){
+        	@Override
+        	public void onNewPicture (WebView view, Picture picture){
+        		if (dialog.isShowing()) {
+        			dialog.dismiss();
+        		}
+        	}
+        };
         mWebView = (WebView) findViewById(R.id.webView);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setScrollBarStyle(WebView.SCROLLBARS_INSIDE_OVERLAY);
-        mWebView.loadUrl(DEFAULT_URL);
+        mWebView.setPictureListener(picture);
+        mWebView.setWebChromeClient(chrome);
+        mWebView.getSettings().setAppCacheEnabled(true);
+        mWebView.getSettings().setAppCacheMaxSize(8 * 1024 * 1024);
+        mWebView.loadUrl(DEFAULT_URL, httpHeaders);
     }
 
     private void setActionBar() {
